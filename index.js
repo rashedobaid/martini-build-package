@@ -17,7 +17,7 @@ const PACKAGE_DIR = core.getInput('package_dir') || 'packages';
 
 const ALLOWED_PACKAGES_INPUT = core.getInput('allowed_packages') || '';
 
-const ALLOWED_PACKAGES = ALLOWED_PACKAGES_INPUT.split(',').map(p => p.trim()).filter(Boolean);
+const ALLOWED_PACKAGES = ALLOWED_PACKAGES_INPUT.split(/\s*,\s*/).filter(Boolean);
 
 async function zipPackage(directory) {
     const PACKAGE_NAME = path.basename(directory);
