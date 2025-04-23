@@ -2,6 +2,9 @@ const archiver = require('archiver');
 const core = require('@actions/core');
 const fs = require('fs');
 const path = require('path');
+const fetch = require('node-fetch');
+const FormData = require('form-data');
+const stream = fs.createReadStream(zipPath);
 
 const MARTINI_BASE_URL = core.getInput('base_url', {
     required: true,
@@ -12,6 +15,10 @@ const MARTINI_ACCESS_TOKEN = core.getInput('access_token', {
 });
 
 const PACKAGE_DIR = core.getInput('package_dir') || 'packages';
+
+const ALLOWED_PACKAGES_INPUT = core.getInput('allowed_packages') || '';
+
+const ALLOWED_PACKAGES = ALLOWED_PACKAGES_INPUT.split(',').map(p => p.trim()).filter(Boolean);
 
 async function zipPackage(directory) {
     const PACKAGE_NAME = path.basename(directory);
@@ -34,7 +41,7 @@ async function zipPackage(directory) {
 
 async function uploadPackage(zipPath, PACKAGE_NAME) {
     const packageData = new FormData();
-    packageData.set('file', await fs.openAsBlob(zipPath), `${PACKAGE_NAME}.zip`);
+    packageData.append('file', stream, `${PACKAGE_NAME}.zip`);
 
     const uploadResponse = await fetch(`${MARTINI_BASE_URL}/esbapi/packages/upload?stateOnCreate=STARTED&replaceExisting=true`, {
         body: packageData,
@@ -52,7 +59,17 @@ async function uploadPackage(zipPath, PACKAGE_NAME) {
 }
 
 async function processPackages() {
-    const packageDirs = fs.readdirSync(PACKAGE_DIR).filter((file) => fs.statSync(path.join(PACKAGE_DIR, file)).isDirectory());
+    const packageDirs = fs.readdirSync(PACKAGE_DIR).filter((file) => {
+        const fullPath = path.join(PACKAGE_DIR, file);
+        const isDir = fs.statSync(fullPath).isDirectory();
+        const isAllowed = ALLOWED_PACKAGES.length === 0 || ALLOWED_PACKAGES.includes(file);
+        return isDir && isAllowed;
+    });
+
+    if (packageDirs.length === 0) {
+        core.info('No packages matched the allowed list.');
+        return;
+    }
 
     for (const packageDir of packageDirs) {
         const directoryPath = path.join(PACKAGE_DIR, packageDir);
