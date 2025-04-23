@@ -105,7 +105,9 @@ const MARTINI_ACCESS_TOKEN = core.getInput('access_token', {
 });
 
 const PACKAGE_DIR = core.getInput('package_dir') || 'packages';
+
 const ALLOWED_PACKAGES_INPUT = core.getInput('allowed_packages') || '';
+
 const ALLOWED_PACKAGES = ALLOWED_PACKAGES_INPUT.split(',').map(p => p.trim()).filter(Boolean);
 
 async function zipPackage(directory) {
