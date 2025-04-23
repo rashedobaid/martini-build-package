@@ -74334,7 +74334,6 @@ const fs = __nccwpck_require__(9896);
 const path = __nccwpck_require__(6928);
 const fetch = __nccwpck_require__(2274);
 const FormData = __nccwpck_require__(7834);
-const stream = fs.createReadStream(zipPath);
 
 const MARTINI_BASE_URL = core.getInput('base_url', {
     required: true,

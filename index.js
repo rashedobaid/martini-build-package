@@ -4,7 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const fetch = require('node-fetch');
 const FormData = require('form-data');
-const stream = fs.createReadStream(zipPath);
 
 const MARTINI_BASE_URL = core.getInput('base_url', {
     required: true,
