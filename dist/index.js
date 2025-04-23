@@ -74371,6 +74371,7 @@ async function zipPackage(directory) {
 
 async function uploadPackage(zipPath, PACKAGE_NAME) {
     const packageData = new FormData();
+    const stream = fs.createReadStream(zipPath);
     packageData.append('file', stream, `${PACKAGE_NAME}.zip`);
 
     const uploadResponse = await fetch(`${MARTINI_BASE_URL}/esbapi/packages/upload?stateOnCreate=STARTED&replaceExisting=true`, {
@@ -74380,6 +74381,7 @@ async function uploadPackage(zipPath, PACKAGE_NAME) {
         },
         method: 'POST',
     });
+
     const uploadResponseJson = await uploadResponse.json();
     if (!uploadResponse.ok || uploadResponseJson.length !== 1) {
         throw Error(JSON.stringify(uploadResponseJson));
